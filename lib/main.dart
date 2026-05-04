@@ -17,7 +17,7 @@ class MainApp extends StatelessWidget {
     // Ubah dari MaterialApp biasa menjadi MaterialApp.router
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'UTD Store kaye',
+      title: 'UTD Store Rifky Raihan',
       theme: AppTheme.lightTheme,
       // Masukkan konfigurasi rute yang sudah kita buat
       routerConfig: AppRouter.router,
