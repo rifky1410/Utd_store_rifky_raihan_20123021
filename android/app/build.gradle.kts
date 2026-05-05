@@ -1,5 +1,3 @@
-import com.android.build.gradle.LibraryExtension
-
 allprojects {
     repositories {
         google()
@@ -23,10 +21,10 @@ tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
 
-// FIX TERBARU UNTUK ISAR PLUGIN (Tanpa afterEvaluate)
+// FIX UNTUK ISAR NAMESPACE AGP 8+ (Aman dan didukung oleh kompilator Flutter)
 subprojects {
     project.plugins.withId("com.android.library") {
-        project.extensions.configure<LibraryExtension>("android") {
+        project.extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
             if (namespace == null) {
                 namespace = "com.example." + project.name.replace("-", "_")
             }
