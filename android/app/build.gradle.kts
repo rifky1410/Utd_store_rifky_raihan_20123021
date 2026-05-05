@@ -1,44 +1,49 @@
-plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
 }
 
-android {
-    namespace = "com.example.utd_store_rifky_raihan_20123021"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
+rootProject.layout.buildDirectory.value(newBuildDir)
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
+subprojects {
+    val newSubprojectBuildDir: Directory = rootProject.layout.buildDirectory.dir(project.name).get()
+    project.layout.buildDirectory.value(newSubprojectBuildDir)
+}
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
+subprojects {
+    project.evaluationDependsOn(":app")
+}
 
-    defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.utd_store_rifky_raihan_20123021"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
-    }
+tasks.register<Delete>("clean") {
+    delete(rootProject.layout.buildDirectory)
+}
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+// FIX 1: UNTUK ISAR NAMESPACE AGP 8+ (Aman dan didukung oleh kompilator Flutter)
+subprojects {
+    project.plugins.withId("com.android.library") {
+        project.extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+            if (namespace == null) {
+                namespace = "com.example." + project.name.replace("-", "_")
+            }
         }
     }
 }
 
-flutter {
-    source = "../.."
+// FIX 2: PENYUSUP OTOMATIS (Menghapus atribut yang dilarang dari dalam cache GitHub/Lokal)
+gradle.projectsEvaluated {
+    subprojects {
+        if (project.name == "isar_flutter_libs") {
+            val manifestFile = file("${project.projectDir}/src/main/AndroidManifest.xml")
+            if (manifestFile.exists()) {
+                val content = manifestFile.readText()
+                if (content.contains("package=\"dev.isar.isar_flutter_libs\"")) {
+                    manifestFile.writeText(content.replace("package=\"dev.isar.isar_flutter_libs\"", ""))
+                    println("✅ Berhasil menghapus atribut package yang dilarang dari isar_flutter_libs!")
+                }
+            }
+        }
+    }
 }
