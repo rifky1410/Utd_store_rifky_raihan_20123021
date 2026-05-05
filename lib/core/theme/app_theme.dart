@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Mencegah class ini di-instansiasi
   AppTheme._();
 
   static ThemeData get lightTheme {
@@ -15,7 +14,7 @@ class AppTheme {
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.teal,
-        foregroundColor: Colors.white, // Warna teks di AppBar
+        foregroundColor: Colors.white,
       ),
     );
   }

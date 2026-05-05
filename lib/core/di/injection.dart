@@ -1,9 +1,18 @@
 import 'package:get_it/get_it.dart';
+import '../network/api_client.dart';
 import '../../features/product/domain/splash_service.dart';
+import '../../features/product/data/product_repository.dart';
+import '../../features/product/domain/product_service.dart';
+import '../../features/product/presentation/cubit/product_cubit.dart';
+import '../../features/bookmark/data/isar_service.dart';
 
 final locator = GetIt.instance;
 
 void setupLocator() {
-  // Mendaftarkan Splash Service agar bisa dipanggil oleh UI
+  locator.registerLazySingleton<ApiClient>(() => ApiClient());
   locator.registerLazySingleton<SplashService>(() => SplashService());
+  locator.registerLazySingleton<ProductRepository>(() => ProductRepository());
+  locator.registerFactory<ProductService>(() => ProductService(locator()));
+  locator.registerFactory<ProductCubit>(() => ProductCubit(locator()));
+  locator.registerLazySingleton<IsarService>(() => IsarService());
 }

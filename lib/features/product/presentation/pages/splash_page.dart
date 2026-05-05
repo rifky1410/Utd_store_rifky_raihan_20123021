@@ -18,11 +18,8 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   Future<void> _runSplashLogic() async {
-    // Memanggil mesin delay 1 detik dari layer Service (Syarat UTS terpenuhi)
     final splashService = locator<SplashService>();
     await splashService.executePersonalDelay();
-
-    // Pindah ke halaman Katalog secara elegan tanpa bisa di-back
     if (mounted) {
       context.go('/product');
     }
@@ -33,7 +30,6 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        // Tampilan Menarik: Latar belakang gradien
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.teal.shade800, Colors.teal.shade300],
@@ -48,15 +44,9 @@ class _SplashPageState extends State<SplashPage> {
             const SizedBox(height: 20),
             const Text(
               'UTD Store',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 2,
-              ),
+              style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 20),
-            // Menampilkan Nama dan NIM (Syarat UTS)
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
