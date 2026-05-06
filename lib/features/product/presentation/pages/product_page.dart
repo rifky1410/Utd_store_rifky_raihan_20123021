@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../cubit/product_cubit.dart';
-import '../cubit/product_state.dart';
 import '../../../../core/di/injection.dart';
 import '../../../bookmark/data/isar_service.dart';
 import '../../../bookmark/domain/bookmark_model.dart';
+import '../cubit/product_cubit.dart';
+import '../cubit/product_state.dart';
 
 class ProductPage extends StatelessWidget {
   const ProductPage({super.key});
@@ -14,17 +14,16 @@ class ProductPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('UTD Store Kelompok 9'),
+        title: const Text('UTD Store - Kelompok 9'),
+        backgroundColor: Colors.tealAccent.shade700,
         actions: [
-          // TOMBOL MENUJU HALAMAN CRYPTO (WebSocket)
-          IconButton(
-            icon: const Icon(Icons.show_chart),
-            onPressed: () => context.push('/crypto'), 
-          ),
-          // TOMBOL MENUJU HALAMAN BOOKMARK (Isar Database)
           IconButton(
             icon: const Icon(Icons.bookmark),
-            onPressed: () => context.push('/bookmark'), 
+            onPressed: () => context.push('/bookmark'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.currency_bitcoin),
+            onPressed: () => context.push('/crypto'),
           ),
         ],
       ),
@@ -32,58 +31,43 @@ class ProductPage extends StatelessWidget {
         builder: (context, state) {
           if (state is ProductLoading) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is ProductError) {
-            return Center(child: Text(state.message, style: const TextStyle(color: Colors.red)));
           } else if (state is ProductLoaded) {
-            final products = state.products;
             return ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: products.length,
+              itemCount: state.products.length,
               itemBuilder: (context, index) {
-                final item = products[index];
+                final item = state.products[index];
                 return Card(
-                  elevation: 3,
-                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  margin: const EdgeInsets.all(8.0),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.all(10),
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        item.image,
-                        width: 60,
-                        height: 60,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 50),
-                      ),
+                    leading: Image.network(
+                      item.image,
+                      width: 50,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(Icons.broken_image),
                     ),
-                    title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold), maxLines: 2, overflow: TextOverflow.ellipsis),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text('\$${item.price}', style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold)),
-                    ),
+                    title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('\$${item.price}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.favorite_border, color: Colors.teal),
                       onPressed: () async {
                         final isarService = locator<IsarService>();
-                        final now = DateTime.now();
                         
+                        // PERBAIKAN: Tambahkan .toString() pada item.id
                         final newBookmark = Bookmark()
-                          ..productId = item.id
+                          ..productId = item.id.toString() 
                           ..name = item.name
                           ..image = item.image
-                          ..price = item.price
-                          ..timestamp = now;
+                          ..price = double.tryParse(item.price) ?? 0.0 
+                          ..timestamp = DateTime.now();
 
                         await isarService.saveBookmark(newBookmark);
-
-                        final jam = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
                         
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Tersimpan di Bookmark pada $jam!'),
-                              duration: const Duration(seconds: 2),
-                              backgroundColor: Colors.teal.shade800,
+                            const SnackBar(
+                              content: Text('Berhasil disimpan ke Bookmark!'),
+                              backgroundColor: Colors.teal,
+                              duration: Duration(seconds: 1),
                             ),
                           );
                         }
@@ -93,9 +77,15 @@ class ProductPage extends StatelessWidget {
                 );
               },
             );
+          } else if (state is ProductError) {
+            return Center(child: Text(state.message));
           }
-          return const SizedBox.shrink();
+          return const Center(child: Text('Tidak ada data produk.'));
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.read<ProductCubit>().fetchAllProducts(),
+        child: const Icon(Icons.refresh),
       ),
     );
   }

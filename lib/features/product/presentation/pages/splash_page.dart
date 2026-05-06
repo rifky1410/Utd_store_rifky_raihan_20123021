@@ -50,7 +50,7 @@ class _SplashPageState extends State<SplashPage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(30),
               ),
               child: const Column(

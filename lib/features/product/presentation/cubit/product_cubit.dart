@@ -1,19 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/product_repository.dart';
 import 'product_state.dart';
-import '../../domain/product_service.dart';
 
 class ProductCubit extends Cubit<ProductState> {
-  final ProductService _service;
+  final ProductRepository repository;
 
-  ProductCubit(this._service) : super(ProductLoading());
+  ProductCubit(this.repository) : super(ProductInitial());
 
   Future<void> fetchAllProducts() async {
-    emit(ProductLoading());
     try {
-      final data = await _service.fetchProducts();
-      emit(ProductLoaded(data));
+      emit(ProductLoading());
+      // Memanggil fungsi yang ada di ProductRepository
+      final products = await repository.fetchAllProducts();
+      emit(ProductLoaded(products));
     } catch (e) {
-      emit(ProductError('Gagal memuat produk: $e'));
+      emit(ProductError(e.toString()));
     }
   }
 }
