@@ -11,32 +11,30 @@ class BookmarkPage extends StatelessWidget {
     final isarService = locator<IsarService>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daftar Bookmark'),
-        backgroundColor: Colors.tealAccent.shade100,
-      ),
+      appBar: AppBar(title: const Text('My Bookmarks')),
+      // Menggunakan StreamBuilder agar reaktif (watch)
       body: StreamBuilder<List<Bookmark>>(
         stream: isarService.listenToBookmarks(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          
-          final bookmarks = snapshot.data ?? [];
-          
-          if (bookmarks.isEmpty) {
-            return const Center(child: Text('Belum ada produk yang disimpan.'));
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text("Belum ada bookmark"));
           }
 
+          final bookmarks = snapshot.data!;
           return ListView.builder(
             itemCount: bookmarks.length,
             itemBuilder: (context, index) {
               final item = bookmarks[index];
+              
+              // Logika Personal: Format jam HH:mm
+              final String formattedTime = 
+                  "${item.timestamp.hour.toString().padLeft(2, '0')}:${item.timestamp.minute.toString().padLeft(2, '0')}";
+
               return ListTile(
-                // Menghapus null-aware (?? '') karena field sudah non-nullable
-                leading: Image.network(item.image, width: 50, errorBuilder: (c, e, s) => const Icon(Icons.broken_image)),
+                leading: Image.network(item.image, width: 50),
                 title: Text(item.name),
-                subtitle: Text('\$${item.price}'),
+                // Aturan ETS: Tampilkan teks "Disimpan pada ..."
+                subtitle: Text("Disimpan pada $formattedTime"), 
                 trailing: IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
                   onPressed: () => isarService.deleteBookmark(item.id),

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 class SplashService {
-  // LOGIKA PERSONAL: Delay 1 Detik (Digit terakhir NIM 20123021 adalah 1)
-  Future<void> executePersonalDelay() async {
+  // Logika Personal: Delay persis 1 detik (Digit terakhir NIM: 20123021)
+  // Aturan ETS: Delay diatur di level Service/Domain, bukan UI.
+  Future<void> startAppDelay() async {
     await Future.delayed(const Duration(seconds: 1));
   }
 }

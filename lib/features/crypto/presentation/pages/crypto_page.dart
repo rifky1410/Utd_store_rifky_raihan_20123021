@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // Wajib untuk fungsi compute (Isolate)
 import '../../data/crypto_service.dart';
 import '../../domain/crypto_model.dart';
+
+// 1. Fungsi Isolate (Top-level function)
+// Harus berada di luar class agar bisa dijalankan di Isolate berbeda
+double calculateCryptoTax(int iterations) {
+  double total = 0;
+  for (int i = 0; i < iterations; i++) {
+    total += i;
+  }
+  return total;
+}
 
 class CryptoPage extends StatefulWidget {
   const CryptoPage({super.key});
@@ -10,52 +21,104 @@ class CryptoPage extends StatefulWidget {
 }
 
 class _CryptoPageState extends State<CryptoPage> {
-  late CryptoService _cryptoService;
-
-  @override
-  void initState() {
-    super.initState();
-    _cryptoService = CryptoService();
-  }
+  final CryptoService _cryptoService = CryptoService();
+  String _calculationResult = "";
+  bool _isCalculating = false;
 
   @override
   void dispose() {
-    _cryptoService.closeConnection();
+    _cryptoService.closeConnection(); // Menutup koneksi WebSocket saat keluar
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1A1A2E),
       appBar: AppBar(
-        title: const Text('Live Crypto Prices (WS)'),
-        backgroundColor: Colors.orangeAccent.withValues(alpha: 0.3),
+        backgroundColor: const Color(0xFF1A1A2E),
+        title: const Text("DIA Real-time Bitcoin", style: TextStyle(color: Colors.white)),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Center(
-        child: StreamBuilder<CryptoModel>(
-          stream: _cryptoService.cryptoStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-            if (!snapshot.hasData) return const CircularProgressIndicator();
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.currency_bitcoin, size: 100, color: Colors.orange),
+            const SizedBox(height: 10),
+            const Text(
+              "Harga BTC (DIA Data)",
+              style: TextStyle(color: Colors.grey, fontSize: 16),
+            ),
+            
+            // Integrasi WebSocket untuk harga real-time
+            StreamBuilder<CryptoModel>(
+              stream: _cryptoService.cryptoStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(
+                    "\$ ${snapshot.data!.price}",
+                    style: const TextStyle(
+                      color: Color(0xFF00F5D4),
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  );
+                }
+                return const CircularProgressIndicator(color: Color(0xFF00F5D4));
+              },
+            ),
+            
+            const SizedBox(height: 50),
+            
+            // Tombol Kalkulasi Pajak menggunakan Isolate
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF00F5D4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: _isCalculating ? null : () async {
+                    setState(() {
+                      _isCalculating = true;
+                      _calculationResult = "Sedang menghitung...";
+                    });
 
-            final data = snapshot.data!;
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.currency_bitcoin, size: 80, color: Colors.orange),
-                const SizedBox(height: 20),
-                Text(data.symbol, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                Text(
-                  '\$${double.parse(data.price).toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 40, color: Colors.green, fontWeight: FontWeight.bold),
+                    // Logika Personal: Looping 21 * 10.000.000 (NPM 20123021)
+                    // Menggunakan compute agar UI TIDAK FREEZE saat looping[cite: 1]
+                    final result = await compute(calculateCryptoTax, 21 * 10000000);
+
+                    setState(() {
+                      _isCalculating = false;
+                      _calculationResult = "Selesai! Hasil: ${result.toStringAsFixed(0)}";
+                    });
+                  },
+                  child: _isCalculating 
+                    ? const CircularProgressIndicator(color: Color(0xFF1A1A2E))
+                    : const Text(
+                        "Kalkulasi Pajak (Isolate)",
+                        style: TextStyle(color: Color(0xFF1A1A2E), fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(20),
-                  child: Text('Data diperbarui secara otomatis via WebSocket', textAlign: TextAlign.center),
-                ),
-              ],
-            );
-          },
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            Text(
+              _calculationResult,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
         ),
       ),
     );
