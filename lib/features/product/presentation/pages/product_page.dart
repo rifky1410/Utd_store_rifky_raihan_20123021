@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
 import '../../../bookmark/data/isar_service.dart';
 import '../../../bookmark/domain/bookmark_model.dart';
-import '../../../native/battery_service.dart'; // Import service native baru Anda
 import '../cubit/product_cubit.dart';
 import '../cubit/product_state.dart';
 
@@ -14,7 +13,7 @@ class ProductPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E), // Menyesuaikan tema gelap di foto Anda
+      backgroundColor: const Color(0xFF1A1A2E),
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A2E),
         elevation: 0,
@@ -26,21 +25,20 @@ class ProductPage extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
             Text(
-              "Rifky Raihan", // UPDATE: Nama disesuaikan dengan NPM 20123021
+              "Rifky Raihan", // Identitas NPM 20123021
               style: TextStyle(fontSize: 14, color: Colors.tealAccent),
             ),
           ],
         ),
         actions: [
-          // Tombol Cek Baterai Native (Ikon HP)
+          // Tombol Ikon HP: Menuju Integrasi Native Android
           IconButton(
             icon: const Icon(Icons.phonelink_setup, color: Colors.white),
-            onPressed: () async {
-              final batteryService = BatteryService();
-              await batteryService.showBatteryAndToast();
+            onPressed: () {
+              // Memanggil route /native sesuai AppRouter
+              context.push('/native'); 
             },
           ),
-          // Tombol Bookmark
           IconButton(
             icon: const Icon(Icons.bookmark, color: Colors.indigoAccent),
             onPressed: () => context.push('/bookmark'),
@@ -72,30 +70,15 @@ class ProductPage extends StatelessWidget {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.broken_image, color: Colors.white),
                       ),
                     ),
                     title: Text(
-                      item.name, // Nama otomatis mengandung "[Diskon 10%]" dari Repo
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      item.name, // Logika "[Diskon 10%]" otomatis dari Repo[cite: 1]
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                     ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 4),
-                        Text(
-                          "ID: ${item.id}",
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                        Text(
-                          "\$${item.price}",
-                          style: const TextStyle(color: Colors.tealAccent),
-                        ),
-                      ],
+                    subtitle: Text(
+                      "\$${item.price}",
+                      style: const TextStyle(color: Colors.tealAccent),
                     ),
                     trailing: IconButton(
                       icon: const Icon(Icons.favorite_border, color: Colors.pinkAccent),
@@ -106,16 +89,13 @@ class ProductPage extends StatelessWidget {
                           ..name = item.name
                           ..image = item.image
                           ..price = double.tryParse(item.price) ?? 0.0
-                          ..timestamp = DateTime.now();
+                          ..timestamp = DateTime.now(); // Timestamp Isar[cite: 1]
 
                         await isarService.saveBookmark(newBookmark);
-
+                        
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Tersimpan di Bookmark!'),
-                              backgroundColor: Colors.teal,
-                            ),
+                            const SnackBar(content: Text('Tersimpan di Bookmark!')),
                           );
                         }
                       },
@@ -130,9 +110,8 @@ class ProductPage extends StatelessWidget {
           return const Center(child: Text('Tidak ada data.'));
         },
       ),
-      // Tombol Mengambang untuk ke halaman Crypto
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/crypto'),
+        onPressed: () => context.push('/crypto'), // Route ke Crypto[cite: 1]
         backgroundColor: Colors.orangeAccent,
         icon: const Icon(Icons.show_chart, color: Colors.black),
         label: const Text("Live Crypto", style: TextStyle(color: Colors.black)),
