@@ -2,16 +2,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class BatteryService {
+  // Nama channel ini HARUS SAMA dengan yang di Kotlin
   static const platform = MethodChannel('com.utd.store/native');
 
   Future<void> showBatteryAndToast() async {
     try {
-      final int level = await platform.invokeMethod('getBatteryLevel');
+      final int result = await platform.invokeMethod('getBatteryLevel');
       await platform.invokeMethod('showToast', {
-        "message": "Baterai HP Purnama Raharja (Kel. 9): $level%"
+        // Pesan Toast
+        "message": "Baterai HP Rifky Raihan (20123021): $result%"
       });
     } on PlatformException catch (e) {
-      debugPrint("Native Error: ${e.message}");
+      debugPrint("Gagal memanggil native: '${e.message}'.");
     }
   }
 }
