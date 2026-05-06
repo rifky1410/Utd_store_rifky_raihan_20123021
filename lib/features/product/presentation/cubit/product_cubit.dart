@@ -1,26 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../data/product_repository.dart';
 import 'product_state.dart';
+import '../../data/product_repository.dart';
 
 class ProductCubit extends Cubit<ProductState> {
   final ProductRepository repository;
 
   ProductCubit(this.repository) : super(ProductInitial());
 
-  Future<void> fetchAllProducts() async {
+  Future<void> fetchProducts() async {
     try {
-      emit(ProductLoading()); // Mengubah state ke loading
-      
-      // Mengambil data dari repository yang terhubung ke API
+      emit(ProductLoading());
+      // Memanggil fungsi fetchAllProducts yang baru saja di-update di Repository
       final products = await repository.fetchAllProducts();
-      
-      if (products.isEmpty) {
-        emit(ProductError("Data produk tidak ditemukan di server."));
-      } else {
-        emit(ProductLoaded(products)); // Mengirim data ke UI
-      }
+      emit(ProductLoaded(products));
     } catch (e) {
-      emit(ProductError("Terjadi kesalahan: ${e.toString()}"));
+      emit(ProductError("Gagal mengambil data: ${e.toString()}"));
     }
   }
 }

@@ -3,25 +3,19 @@ import 'product_remote_data_source.dart';
 
 class ProductRepository {
   final ProductRemoteDataSource remoteDataSource;
-
   ProductRepository(this.remoteDataSource);
 
+  // Nama fungsi diubah menjadi fetchAllProducts agar dikenali oleh product_service.dart
   Future<List<ProductModel>> fetchAllProducts() async {
-    // Ambil data mentah dari remote data source
-    final List<dynamic> data = await remoteDataSource.fetchProducts();
-
-    // Logika Personal (Anti-AI): Manipulasi data di level Repository[cite: 1].
-    // Digit terakhir NIM 20123021 adalah 1 (Ganjil).
-    // Aturan: Tambahkan "[Diskon 10%]" di belakang semua nama produk[cite: 1].
-    return data.map((json) {
-      final product = ProductModel.fromJson(json);
-      
-      // Menggunakan copyWith untuk mengubah nama produk secara aman
+    final products = await remoteDataSource.getProducts();
+    
+    // Logika Modul: Menambahkan "[Diskon 10%]" tetap dipertahankan
+    return products.map((item) {
       return ProductModel(
-        id: product.id,
-        name: "${product.name} [Diskon 10%]", // Penambahan teks diskon
-        price: product.price,
-        image: product.image,
+        id: item.id,
+        name: "${item.name} [Diskon 10%]",
+        image: item.image,
+        price: item.price,
       );
     }).toList();
   }

@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
-import 'core/theme/app_theme.dart';
-import 'core/routing/app_router.dart';
 import 'core/di/injection.dart';
+import 'core/routing/app_router.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  setupLocator();
-  runApp(const MainApp());
+  await setupLocator(); // Wajib dipanggil sebelum runApp
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'UTD Store Rifky Raihan',
-      theme: AppTheme.lightTheme,
+      title: 'UTD Store',
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(0xFF1A1A2E),
+      ),
       routerConfig: AppRouter.router,
+      debugShowCheckedModeBanner: false,
     );
   }
 }
