@@ -14,21 +14,19 @@ class _NativePageState extends State<NativePage> {
 
   Future<void> _handleGetBattery() async {
     try {
-      // Mengambil data dari Kotlin
       final int level = await BatteryService.platform.invokeMethod('getBatteryLevel');
-      
       setState(() {
         _batteryStatus = "Persentase Baterai: $level%";
       });
     } catch (e) {
       setState(() {
-        _batteryStatus = "Gagal mengambil data baterai.";
+        // Pesan error diperjelas agar tahu letak masalahnya
+        _batteryStatus = "Gagal memanggil data baterai.\nPastikan MainActivity.kt sudah benar.";
       });
     }
   }
 
   Future<void> _handleShowToast() async {
-    // Memanggil fungsi Toast yang ada di BatteryService
     await _batteryService.showBatteryAndToast();
   }
 
@@ -39,11 +37,8 @@ class _NativePageState extends State<NativePage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A1A2E),
         elevation: 0,
-        // Mengubah judul AppBar menjadi Rifky Raihan
-        title: const Text(
-          "Rifky Raihan - Native", 
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)
-        ),
+        // Judul diperbaiki sesuai permintaan Anda
+        title: const Text("Integrasi Native Android", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -62,16 +57,12 @@ class _NativePageState extends State<NativePage> {
             children: [
               const Icon(Icons.android, size: 80, color: Color(0xFF3DDC84)),
               const SizedBox(height: 20),
-              
               Text(
                 _batteryStatus,
-                style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
-              
               const SizedBox(height: 40),
-              
-              // Tombol 1: Cek Baterai
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -85,10 +76,7 @@ class _NativePageState extends State<NativePage> {
                   onPressed: _handleGetBattery,
                 ),
               ),
-              
               const SizedBox(height: 15),
-              
-              // Tombol 2: Munculkan Toast
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(

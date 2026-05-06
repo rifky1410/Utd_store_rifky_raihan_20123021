@@ -22,7 +22,7 @@ class ProductPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text("UTD Store", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-              Text("Purnama Raharja - Kelompok 9", style: TextStyle(fontSize: 14, color: Colors.tealAccent)),
+              Text("Rifky Raihan", style: TextStyle(fontSize: 14, color: Colors.tealAccent)),
             ],
           ),
           actions: [

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // Wajib untuk fungsi compute
+import 'package:flutter/foundation.dart';
 import '../../data/crypto_service.dart';
 import '../../domain/crypto_model.dart';
 
-// Fungsi WAJIB di luar class agar bisa dijalankan di Isolate terpisah
-double heavyLoop(int n) {
+// FUNGSI TOP-LEVEL (Wajib berada di paling luar class agar Isolate bekerja)
+double heavyTaxCalculation(int target) {
   double total = 0;
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < target; i++) {
     total += i;
   }
   return total;
@@ -21,7 +21,7 @@ class CryptoPage extends StatefulWidget {
 
 class _CryptoPageState extends State<CryptoPage> {
   final CryptoService _cryptoService = CryptoService();
-  String _calculationResult = "Belum ada kalkulasi.";
+  String _calculationResult = "Klik tombol untuk kalkulasi 210 Juta looping.";
   bool _isCalculating = false;
 
   @override
@@ -48,7 +48,6 @@ class _CryptoPageState extends State<CryptoPage> {
           children: [
             const Icon(Icons.currency_bitcoin, size: 100, color: Colors.orange),
             const SizedBox(height: 10),
-            
             StreamBuilder<CryptoModel>(
               stream: _cryptoService.cryptoStream,
               builder: (context, snapshot) {
@@ -61,9 +60,7 @@ class _CryptoPageState extends State<CryptoPage> {
                 return const CircularProgressIndicator(color: Color(0xFF00F5D4));
               },
             ),
-            
             const SizedBox(height: 50),
-            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40),
               child: SizedBox(
@@ -74,18 +71,19 @@ class _CryptoPageState extends State<CryptoPage> {
                     backgroundColor: const Color(0xFF00F5D4),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
+                  // Tombol dimatikan (null) jika sedang proses menghitung
                   onPressed: _isCalculating ? null : () async {
                     setState(() {
                       _isCalculating = true;
-                      _calculationResult = "Sedang menghitung... (Isolate berjalan)";
+                      _calculationResult = "Memproses di latar belakang... Mohon tunggu.";
                     });
 
-                    // Menjalankan looping 210 Juta (NIM 21 * 10.000.000)
-                    final result = await compute(heavyLoop, 21 * 10000000);
+                    // Proses Isolate dengan jumlah loop 21.000.000 (NPM 21)
+                    final result = await compute(heavyTaxCalculation, 21000000);
 
                     setState(() {
                       _isCalculating = false;
-                      _calculationResult = "Selesai! Hasil: ${result.toStringAsFixed(0)}";
+                      _calculationResult = "Pajak Selesai! Hasil: ${result.toStringAsFixed(0)}";
                     });
                   },
                   child: _isCalculating 
@@ -97,7 +95,6 @@ class _CryptoPageState extends State<CryptoPage> {
                 ),
               ),
             ),
-            
             const SizedBox(height: 20),
             Text(
               _calculationResult,
