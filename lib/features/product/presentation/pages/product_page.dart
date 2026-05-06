@@ -52,7 +52,6 @@ class ProductPage extends StatelessWidget {
                       onPressed: () async {
                         final isarService = locator<IsarService>();
                         
-                        // PERBAIKAN: Tambahkan .toString() pada item.id
                         final newBookmark = Bookmark()
                           ..productId = item.id.toString() 
                           ..name = item.name
@@ -60,17 +59,19 @@ class ProductPage extends StatelessWidget {
                           ..price = double.tryParse(item.price) ?? 0.0 
                           ..timestamp = DateTime.now();
 
+                        // Proses async (Menunggu database)
                         await isarService.saveBookmark(newBookmark);
                         
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Berhasil disimpan ke Bookmark!'),
-                              backgroundColor: Colors.teal,
-                              duration: Duration(seconds: 1),
-                            ),
-                          );
-                        }
+                        // SOLUSI: Cek apakah context masih aktif sebelum menampilkan SnackBar
+                        if (!context.mounted) return;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Berhasil disimpan ke Bookmark!'),
+                            backgroundColor: Colors.teal,
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
                       },
                     ),
                   ),
@@ -78,14 +79,22 @@ class ProductPage extends StatelessWidget {
               },
             );
           } else if (state is ProductError) {
-            return Center(child: Text(state.message));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(state.message, textAlign: TextAlign.center),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () => context.read<ProductCubit>().fetchAllProducts(),
+                    child: const Text("Coba Lagi"),
+                  )
+                ],
+              ),
+            );
           }
           return const Center(child: Text('Tidak ada data produk.'));
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.read<ProductCubit>().fetchAllProducts(),
-        child: const Icon(Icons.refresh),
       ),
     );
   }

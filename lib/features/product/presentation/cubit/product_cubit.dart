@@ -9,12 +9,18 @@ class ProductCubit extends Cubit<ProductState> {
 
   Future<void> fetchAllProducts() async {
     try {
-      emit(ProductLoading());
-      // Memanggil fungsi yang ada di ProductRepository
+      emit(ProductLoading()); // Mengubah state ke loading
+      
+      // Mengambil data dari repository yang terhubung ke API
       final products = await repository.fetchAllProducts();
-      emit(ProductLoaded(products));
+      
+      if (products.isEmpty) {
+        emit(ProductError("Data produk tidak ditemukan di server."));
+      } else {
+        emit(ProductLoaded(products)); // Mengirim data ke UI
+      }
     } catch (e) {
-      emit(ProductError(e.toString()));
+      emit(ProductError("Terjadi kesalahan: ${e.toString()}"));
     }
   }
 }
